@@ -8,10 +8,10 @@ comptes=$'tout voir\n'$comptes
 # unset -v IFS
 
 
-echo 'Voulez vous filtrer les comptes ?'
+echo '👥 Voulez vous filtrer les comptes ?'
 select name in $comptes
 do
-    echo '-------------------------'
+    echo '--------------------------------------------------'
     if [[ $REPLY -eq 1 ]]
     then
         all=true
@@ -23,10 +23,10 @@ do
 break
 done
 
-echo 'Quelle catégorie ?'
+echo '📦️ Quelle catégorie ?'
 select categorie in 'tout voir' 'adhesion' 'infra' 'don' 'autre'
 do
-    echo '-------------------------'
+    echo '--------------------------------------------------'
     if [[ $REPLY -ne 1 ]]
     then
         data=$(echo "$data" | awk -F $'\t' -v categorie="$categorie" '$6==categorie')	#filtre les entrées par nom ducompte
@@ -35,10 +35,10 @@ do
 break
 done
 
-echo 'Options supplémentaires'
+echo '🔩 Options supplémentaires'
 select option in 'toutes les transactions' 'seulement les transactions effectués' 'seulement les transactions pas encore effectués'
 do
-    echo '-------------------------'
+    echo '--------------------------------------------------'
     case $option in
         'toutes les transactions')
             # do nothing
