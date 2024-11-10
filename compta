@@ -13,7 +13,7 @@ EOF
 
 export PS3="Entrez le numéro correspondant :"
 
-echo "💼 Bienvenue $USER. Que voulez vous faire ?"
+echo "🛎️  Bienvenue $USER. Que voulez vous faire ?"
 select action in 'voir les comptes' 'ajouter une transaction' 'quitter'
 do
     echo '--------------------------------------------------'

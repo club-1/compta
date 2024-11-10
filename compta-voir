@@ -7,6 +7,21 @@ comptes=$(cut -f 4 /var/compta/transactions.tsv | sort -u)
 comptes=$'tout voir\n'$comptes
 # unset -v IFS
 
+echo '🏷️  Quelle catégorie ?'
+select categorie in 'tout voir' 'adhesion' 'infra' 'don' 'autre'
+do
+    echo '--------------------------------------------------'
+    if [[ $REPLY -ne 1 ]]
+    then
+        filtercategory=true
+        data=$(echo "$data" | awk -F $'\t' -v categorie="$categorie" '$6==categorie')	#filtre les entrées par nom ducompte
+    else
+        filtercategory=false
+    fi
+
+break
+done
+
 
 echo '👥 Voulez vous filtrer les comptes ?'
 select name in $comptes
@@ -14,53 +29,62 @@ do
     echo '--------------------------------------------------'
     if [[ $REPLY -eq 1 ]]
     then
-        all=true
+        filteraccount=false
     else
-        all=false
+        filteraccount=true
         data=$(echo "$data" | awk -F $'\t' -v name="$name" '$4==name')	#filtre les entrées par nom ducompte
     fi
 
 break
 done
 
-echo '📦️ Quelle catégorie ?'
-select categorie in 'tout voir' 'adhesion' 'infra' 'don' 'autre'
-do
-    echo '--------------------------------------------------'
-    if [[ $REPLY -ne 1 ]]
-    then
-        data=$(echo "$data" | awk -F $'\t' -v categorie="$categorie" '$6==categorie')	#filtre les entrées par nom ducompte
-    fi
-
-break
-done
 
 echo '🔩 Options supplémentaires'
-select option in 'toutes les transactions' 'seulement les transactions effectués' 'seulement les transactions pas encore effectués'
+select option in 'peu importe' 'seulement les transactions effectués' 'seulement les transactions pas encore effectués'
 do
     echo '--------------------------------------------------'
     case $option in
-        'toutes les transactions')
-            # do nothing
+        'peu importe')
+            filterchecked=false
             ;;
         'seulement les transactions effectués')
-            data=$(echo "$data" | awk -F $'\t' '$5=="x"')	#filtre les entrées par nom ducompte
+            filterchecked=true
+            data=$(echo "$data" | awk -F $'\t' '$5=="x"')
             ;;
         'seulement les transactions pas encore effectués')
-            data=$(echo "$data" | awk -F $'\t' '$5==""')	#filtre les entrées par nom ducompte
+            filterchecked=true
+            data=$(echo "$data" | awk -F $'\t' '$5==""')
             ;;
     esac
 break
 done
 
-if $all
+cat <<EOF
+
+ ┌──────────────────────────────────────────────────────────────────────────┐ 
+ │           💰️           T R A N S A C T I O N S             📈            │ 
+ └──────────────────────────────────────────────────────────────────────────┘ 
+
+EOF
+
+if [ "$filtercategory" = true ]
 then
-    echo '📚 Voici l intégralité des comptes:'
-else
-    echo "📚 Voici les comptes de $name"
+    echo "🏷️  parmis la catégorie '${categorie}'"
 fi
 
+if [ "$filteraccount" = true ]
+then
+    echo "👥 vers le compte de ${name}"
+fi
 
+if [ "$filterchecked" = true ]
+then
+    echo "✅ ${option}"
+fi
+
+echo
 echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -ts $'\t'
-echo '⚖️ balance :'
+echo
+echo -e "⚖️  \033[1mbalance :\033[00m"
 echo "$data" | cut -f 3 | awk '{t=t+$1} END{print t}'
+echo
