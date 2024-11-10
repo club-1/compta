@@ -114,7 +114,15 @@ do
         ;;
 
         'ajouter une transaction')
-            compta-ajouter
+            if id -nG "$USER" | grep -qw 'compta'
+            then
+                compta-ajouter
+            else
+                echo "Désolé, c'est impossible 😟"
+                echo "Pour ajouter une transaction, il faut être membre du groupe 'compta'"
+            fi
+
+            
         ;;
 
         'quitter')
