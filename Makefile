@@ -3,6 +3,8 @@ PREFIX ?= /usr/local
 
 # Default installation paths
 BIN_DIR     := $(DESTDIR)$(PREFIX)/bin
+DATA_DIR    := $(DESTDIR)/var/compta
+DATA_GROUP  ?= compta
 
 # Files to install
 BINS        := compta compta-ajouter compta-voir
@@ -14,6 +16,8 @@ all: ;
 
 install:
 	install -D -t $(BIN_DIR) $(BINS)
+	addgroup --system $(DATA_GROUP)
+	install -d $(DATA_DIR) -g $(DATA_GROUP) -m 775
 
 uninstall:
 	-rm $(BINS_INST)
