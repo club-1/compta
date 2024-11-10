@@ -60,7 +60,6 @@ voir() {
     break
     done
 
-
     cat <<EOF
 
 ┌──────────────────────────────────────────────────────────────────────────┐ 
@@ -74,7 +73,7 @@ EOF
     if test -n "$category"
     then
         args+=('-c' "$category")
-        echo "🏷️  parmis la catégorie '$category'"
+        echo "🗂️  parmis la catégorie '$category'"
     fi
 
     if test -n "$account"
@@ -101,6 +100,82 @@ EOF
 }
 
 
+ajouter () {
+    args=()
+
+    echo "📝 C'est parti pout ajouter une nouvelle transaction !"
+    echo '==================================================='
+    echo '(Vous pouvez annuler à tout moment en tapant CTRL + C)'
+
+    echo "📅 à quelle date ? (au format YYYY-MM-DD) lasser vide pour aujourd'hui"
+    read date
+    if test -z date
+    then
+        args+=('-d' "$date")
+    fi
+
+    echo "💶 Quel montant ? (indiquer + ou - devant le nombre)"
+    read argent
+    args+=('-m' "$argent")
+
+    echo "💰 compte ayant reçu l'argent ?"
+    accounts=('on ne sait pas encore' 'créer un nouveau compte')
+    readarray -t -s1 -O2 accounts <<< $(cut -f 4 /var/compta/transactions.tsv | sort -u)
+    select account in "${accounts[@]}"
+    do echo "vous avez choisi $account"
+    break
+    done
+    if test "$account" != 'on ne sait pas encore'
+    then
+        if test "$account" == 'créer un nouveau compte'
+        then
+            echo '👤 nom du nouveau compte ?'
+            read account
+        fi
+        args+=('-a' "$account")
+    fi
+
+    echo "✅ le paiement a-t-il été effectué ? (oui/non)"
+    read effectue
+    case $effectue in
+        yes | oui | o | y)
+            args+=('-x')
+            echo 'effectué'
+        ;;
+
+        *)
+            echo 'pas encore effectué'
+        ;;
+    esac
+
+    echo "🗂️  Quelle catégorie ?"
+    select categorie in adhesion infra don autre
+    do echo "vous avez choisi $categorie"
+    break
+    done
+    args+=('-c' "$categorie")
+
+    echo "🏷️  intitulé ?"
+    read info
+    args+=('-i' "$info")
+
+    echo '🧾 Résumé de la transaction :'
+    compta-ajouter "${args[@]}"
+
+    case $? in
+        0)
+            echo "✨ Transaction ajoutée ! Merci $USER et bonne journée"
+            ;;
+        130)
+            echo "🗑️  transaction annulée"
+            ;;
+        *)
+            echo "⛔️ Erreur lors de l'ajoute de la transaction"
+            ;;
+    esac
+
+}
+
 
 
 echo "🛎️  Bienvenue $USER. Que voulez vous faire ?"
@@ -116,7 +191,7 @@ do
         'ajouter une transaction')
             if id -nG "$USER" | grep -qw 'compta'
             then
-                compta-ajouter
+                ajouter
             else
                 echo "Désolé, c'est impossible 😟"
                 echo "Pour ajouter une transaction, il faut être membre du groupe 'compta'"

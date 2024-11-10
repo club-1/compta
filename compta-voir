@@ -2,9 +2,10 @@
 
 usage () {
     cat <<'EOF'
- __             ,                    
-/  ` _ ._ _ ._ -+- _. ___ .  , _ *._.
-\__.(_)[ | )[_) | (_]      \/ (_)|[  
+
+ ┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┬ ┬┌─┐┬ ┬─┐
+ │  │ ││││├─┘ │ ├─┤ -- └┐││ ││ ├┬┘
+ └─┘└─┘┴ ┴┴   ┴ ┴ ┴     └┘└─┘┴ ┴└─
 
 Usage: compta-voir [OPTION]...
 
@@ -17,7 +18,7 @@ Usage: compta-voir [OPTION]...
 
 -h            print this help
 
-Source code: <https://github.com/club-1/compta>
+Git repo: <https://github.com/club-1/compta>
 EOF
 }
 
