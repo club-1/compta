@@ -13,6 +13,96 @@ EOF
 
 export PS3="Entrez le numéro correspondant :"
 
+
+
+voir() {
+    echo '🏷️  Quelle catégorie ?'
+    select filtercategory in 'tout' 'adhesion' 'infra' 'don' 'autre'
+    do
+        echo '--------------------------------------------------'
+        if [[ $REPLY -ne 1 ]]
+        then
+            category="$filtercategory"
+        fi
+
+    break
+    done
+
+
+    accounts=('tout')
+    readarray -t -s1 -O1 accounts <<< $(cut -f 4 /var/compta/transactions.tsv | sort -u)
+    echo '👥 Voulez vous filtrer les comptes ?'
+    select filteraccount in "${accounts[@]}"
+    do
+        echo '--------------------------------------------------'
+        if [[ $REPLY -ne 1 ]]
+        then
+            account="$filteraccount"
+        fi
+
+    break
+    done
+
+
+    echo '🔩 Options supplémentaires'
+    select option in 'non' 'effectué' 'non effectué'
+    do
+        echo '--------------------------------------------------'
+        case $option in
+            'effectué')
+                check='x'
+            ;;
+
+            'non effectué')
+                check='u'
+            ;;
+        esac
+    break
+    done
+
+
+    cat <<EOF
+
+┌──────────────────────────────────────────────────────────────────────────┐ 
+│           💰️           T R A N S A C T I O N S             📈            │ 
+└──────────────────────────────────────────────────────────────────────────┘ 
+
+EOF
+
+    args=()
+
+    if test -n "$category"
+    then
+        args+=('-c' "$category")
+        echo "🏷️  parmis la catégorie '$category'"
+    fi
+
+    if test -n "$account"
+    then
+        args+=('-a' "$account")
+        echo "👥 vers le compte de $account"
+    fi
+
+    if test -n "$check"
+    then
+        args+=("-$check")
+        echo "✅ $option"
+    fi
+
+    args+=('-t')
+    data=$(compta-voir "${args[@]}")
+
+    echo
+    echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -ts $'\t'
+    echo
+    echo -e "⚖️  \033[1mbalance :\033[00m"
+    echo "$data" | cut -f 3 | awk '{t=t+$1} END{print t}'
+    echo
+}
+
+
+
+
 echo "🛎️  Bienvenue $USER. Que voulez vous faire ?"
 select action in 'voir les comptes' 'ajouter une transaction' 'quitter'
 do
@@ -20,11 +110,11 @@ do
     case $action in
 
         'voir les comptes')
-        compta-voir
+            voir
         ;;
 
         'ajouter une transaction')
-        compta-ajouter
+            compta-ajouter
         ;;
 
         'quitter')
@@ -35,4 +125,3 @@ do
 
 break
 done
-

@@ -1,90 +1,93 @@
 #!/bin/bash
 
-export PS3="Entrez le numéro correspondant :"
-IFS=$'\n'
-data=$(cat /var/compta/transactions.tsv)
-comptes=$(cut -f 4 /var/compta/transactions.tsv | sort -u)
-comptes=$'tout voir\n'$comptes
-# unset -v IFS
+usage () {
+    cat <<'EOF'
+ __             ,                    
+/  ` _ ._ _ ._ -+- _. ___ .  , _ *._.
+\__.(_)[ | )[_) | (_]      \/ (_)|[  
 
-echo '🏷️  Quelle catégorie ?'
-select categorie in 'tout voir' 'adhesion' 'infra' 'don' 'autre'
-do
-    echo '--------------------------------------------------'
-    if [[ $REPLY -ne 1 ]]
-    then
-        filtercategory=true
-        data=$(echo "$data" | awk -F $'\t' -v categorie="$categorie" '$6==categorie')	#filtre les entrées par nom ducompte
-    else
-        filtercategory=false
-    fi
+Usage: compta-voir [OPTION]...
 
-break
-done
+-a ACCOUNT    filter using given account name
+-b            Output the balance only
+-c CATEGORY   filter using one of the following category: don|infra|adhesion|autre
+-x            filter checked
+-u            filter unchecked
+-t            output TSV without headers
 
+-h            print this help
 
-echo '👥 Voulez vous filtrer les comptes ?'
-select name in $comptes
-do
-    echo '--------------------------------------------------'
-    if [[ $REPLY -eq 1 ]]
-    then
-        filteraccount=false
-    else
-        filteraccount=true
-        data=$(echo "$data" | awk -F $'\t' -v name="$name" '$4==name')	#filtre les entrées par nom ducompte
-    fi
-
-break
-done
-
-
-echo '🔩 Options supplémentaires'
-select option in 'peu importe' 'seulement les transactions effectués' 'seulement les transactions pas encore effectués'
-do
-    echo '--------------------------------------------------'
-    case $option in
-        'peu importe')
-            filterchecked=false
-            ;;
-        'seulement les transactions effectués')
-            filterchecked=true
-            data=$(echo "$data" | awk -F $'\t' '$5=="x"')
-            ;;
-        'seulement les transactions pas encore effectués')
-            filterchecked=true
-            data=$(echo "$data" | awk -F $'\t' '$5==""')
-            ;;
-    esac
-break
-done
-
-cat <<EOF
-
- ┌──────────────────────────────────────────────────────────────────────────┐ 
- │           💰️           T R A N S A C T I O N S             📈            │ 
- └──────────────────────────────────────────────────────────────────────────┘ 
-
+Source code: <https://github.com/club-1/compta>
 EOF
+}
 
-if [ "$filtercategory" = true ]
-then
-    echo "🏷️  parmis la catégorie '${categorie}'"
-fi
+output='pretty'
 
-if [ "$filteraccount" = true ]
-then
-    echo "👥 vers le compte de ${name}"
-fi
+data=$(cat /var/compta/transactions.tsv)
 
-if [ "$filterchecked" = true ]
-then
-    echo "✅ ${option}"
-fi
+while getopts 'a:bc:tuxh' opt
+do
+    case $opt in
+        a)
+            name="$OPTARG"
+            data=$(echo "$data" | awk -F $'\t' -v name="$name" '$4 ~ name')
+        ;;
 
-echo
-echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -ts $'\t'
-echo
-echo -e "⚖️  \033[1mbalance :\033[00m"
-echo "$data" | cut -f 3 | awk '{t=t+$1} END{print t}'
-echo
+        b)
+            output='balance'
+        ;;
+
+        c)
+            if [ "$OPTARG" = 'don' ] || [ "$OPTARG" = 'infra' ] || [ "$OPTARG" = 'adhesion' ] || [ "$OPTARG" = 'autre' ]
+            then
+                category="$OPTARG"
+                data=$(echo "$data" | awk -F $'\t' -v category="$category" '$6==category')
+            else
+                echo "invalid category argument '${OPTARG}'"
+                exit 1
+            fi
+        ;;
+        
+        t)
+            output='tsv'
+        ;;
+
+        u)
+            data=$(echo "$data" | awk -F $'\t' '$5==""')
+        ;;
+
+        x)
+            data=$(echo "$data" | awk -F $'\t' '$5=="x"')
+        ;;
+
+        h)
+            usage
+            exit
+		;;
+        
+        ?)
+            usage
+            exit 1
+		;;
+    esac
+done
+
+# shift "$(($OPTIND -1))"
+
+
+case $output in
+    'tsv')
+        echo "$data"
+        exit
+    ;;
+
+    'balance')
+        echo "$data" | cut -f 3 | awk '{t=t+$1} END{print t}'
+        exit
+    ;;
+
+    'pretty')
+        echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -ts $'\t'
+        exit
+    ;;
+esac
