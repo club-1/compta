@@ -1,0 +1,66 @@
+#!/bin/bash
+
+export PS3="Entrez le numéro correspondant :"
+IFS=$'\n'
+data=$(cat /var/compta/transactions.tsv)
+comptes=$(cut -f 4 /var/compta/transactions.tsv | sort -u)
+comptes=$'tout voir\n'$comptes
+# unset -v IFS
+
+
+echo 'Voulez vous filtrer les comptes ?'
+select name in $comptes
+do
+    echo '-------------------------'
+    if [[ $REPLY -eq 1 ]]
+    then
+        all=true
+    else
+        all=false
+        data=$(echo "$data" | awk -F $'\t' -v name="$name" '$4==name')	#filtre les entrées par nom ducompte
+    fi
+
+break
+done
+
+echo 'Quelle catégorie ?'
+select categorie in 'tout voir' 'adhesion' 'infra' 'don' 'autre'
+do
+    echo '-------------------------'
+    if [[ $REPLY -ne 1 ]]
+    then
+        data=$(echo "$data" | awk -F $'\t' -v categorie="$categorie" '$6==categorie')	#filtre les entrées par nom ducompte
+    fi
+
+break
+done
+
+echo 'Options supplémentaires'
+select option in 'toutes les transactions' 'seulement les transactions effectués' 'seulement les transactions pas encore effectués'
+do
+    echo '-------------------------'
+    case $option in
+        'toutes les transactions')
+            # do nothing
+            ;;
+        'seulement les transactions effectués')
+            data=$(echo "$data" | awk -F $'\t' '$5=="x"')	#filtre les entrées par nom ducompte
+            ;;
+        'seulement les transactions pas encore effectués')
+            data=$(echo "$data" | awk -F $'\t' '$5==""')	#filtre les entrées par nom ducompte
+            ;;
+    esac
+break
+done
+
+if $all
+then
+    echo '📚 Voici l intégralité des comptes:'
+else
+    echo "📚 Voici les comptes de $name"
+fi
+
+
+echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -ts $'\t'
+echo '⚖️ balance :'
+echo "$data" | cut -f 3 | awk '{t=t+$1} END{print t}'

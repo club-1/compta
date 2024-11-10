@@ -1,0 +1,78 @@
+#!/bin/bash
+export PS3="Entrez le numéro correspondant :"
+
+lastId=$(cut -f 1 /var/compta/transactions.tsv | tail -n 1)
+id=$(($lastId + 1))
+
+echo "📝 C'est parti pout ajouter la transaction n° $id !"
+echo '==================================================='
+echo '(Vous pouvez annuler à tout moment en tapant CTRL + C)'
+echo
+echo "📅 à quelle date ? (au format YYYY-MM-DD) lasser vide pour aujourd'hui"
+read date
+if test -z "$date"
+then
+	date=$(date +%Y-%m-%d)
+	echo "$date"
+fi
+echo "💶 Quel montant ? (indiquer + ou - devant le nombre)"
+read argent
+echo "💰 compte ayant reçu l'argent ?"
+IFS=$'\n'
+options=$(cut -f 4 /var/compta/transactions.tsv | sort -u)
+options=$options$'\ncréer un nouveau compte'
+select compte in $options
+do echo "vous avez choisi $compte"
+break
+done
+unset -v IFS
+# tester si la variable vaut "créer un nouveau compte"
+if test "$compte" == 'créer un nouveau compte'
+then
+	echo "👤 nom du nouveau compte ?"
+	read compte
+fi
+echo "✅ le payment a-t-il été effectué ? (oui/non)"
+read effectue
+case $effectue in
+
+	yes | oui | o | y)
+	effectue='x'
+	;;
+	no | non | n)
+	effectue=''
+	;;
+	*)
+    	echo "🗑️  transaction annulée"
+    	exit 2	
+	;;
+
+esac
+echo "🗂️  Quelle catégorie ?"
+select categorie in adhesion infra don autre
+do echo "vous avez choisi $categorie"
+break
+done
+echo "🏷️  intitulé ?"
+read intitule
+echo '🧾 Résumé de la transaction :'
+echo '----------------------------------------------------'
+transaction=$"$id	$date	$argent	$compte	$effectue	$categorie	$intitule"
+echo "$transaction" | column -N id,date,montant,nom,effectué,catégorie,intitulé -ts $'\t'
+echo '----------------------------------------------------'
+echo "✒️  Voulez vous ajouter cette transaction ? (oui/non)"
+read consent
+case $consent in
+
+	yes | oui | o | y)
+	consent='x'
+	;;
+	*)
+	effectue=''
+    	echo "🗑️  transaction annulée"
+    	exit 2
+	;;
+
+esac
+echo "$transaction" >> /var/compta/transactions.tsv
+echo "✨ Transaction ajoutée ! Merci $USER et bonne journée"

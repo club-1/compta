@@ -1,0 +1,33 @@
+#!/bin/bash
+cat <<-EOF
+
+  ██████╗ ██████╗ ███╗   ███╗██████╗ ████████╗ █████╗     
+ ██╔════╝██╔═══██╗████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗    
+ ██║     ██║   ██║██╔████╔██║██████╔╝   ██║   ███████║    
+ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝    ██║   ██╔══██║    
+ ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║        ██║   ██║  ██║    
+  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝        ╚═╝   ╚═╝  ╚═╝    
+EOF
+
+export PS3="Entrez le numéro correspondant :"
+
+echo 'Que voulez vous faire ?'
+select action in 'ajouter une transaction' 'voir les comptes'
+do
+    echo '-------------------------'
+    case $action in
+
+        'voir les comptes')
+        compta-voir
+        ;;
+
+        'ajouter une transaction')
+        compta-ajouter
+        ;;
+
+    esac
+
+
+break
+done
+
