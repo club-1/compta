@@ -4,21 +4,24 @@ usage () {
     cat <<'EOF'
 
  ┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┬ ┬┌─┐┬ ┬─┐
- │  │ ││││├─┘ │ ├─┤ -- └┐││ ││ ├┬┘
- └─┘└─┘┴ ┴┴   ┴ ┴ ┴     └┘└─┘┴ ┴└─
+ │  │ ││││├─┘ │ ├─┤ -- └┐││ ││ ├┬┘  v1.1
+ └─┘└─┘┴ ┴┴   ┴ ┴ ┴     └┘└─┘┴ ┴└───────── 
 
-Usage: compta-voir [OPTION]...
+Usage: compta-voir [OPTION]... [SEARCH]
 
--a ACCOUNT    filter using given account name
--b            Output the balance only
--c CATEGORY   filter using one of the following category: don|infra|adhesion|autre
--x            filter checked
--u            filter unchecked
--t            output TSV without headers
+  -a ACCOUNT    filter using given account name
+  -b            Output the balance only
+  -c CATEGORY   filter using one of the following category: don|infra|adhesion|autre
+  -x            filter checked
+  -u            filter unchecked
+  -t            output TSV without headers
+  
+  -h            print this help
 
--h            print this help
+SEARCH will look for matches into 'intitulé' column.
 
 Git repo: <https://github.com/club-1/compta>
+Club1 doc: <https://club1.fr/docs/fr/outils/compta.html>
 EOF
 }
 
@@ -73,7 +76,9 @@ do
     esac
 done
 
-# shift "$(($OPTIND -1))"
+shift "$(($OPTIND -1))"
+
+data=$(echo "$data" | awk -F $'\t' -v name="$1" 'tolower($7) ~ tolower(name)')
 
 
 case $output in

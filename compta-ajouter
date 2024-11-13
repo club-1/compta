@@ -4,8 +4,8 @@ usage () {
     cat <<'EOF'
 
  ┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┌─┐ ┬┌─┐┬ ┬┌┬┐┌─┐┬─┐
- │  │ ││││├─┘ │ ├─┤ -- ├─┤ ││ ││ │ │ ├┤ ├┬┘
- └─┘└─┘┴ ┴┴   ┴ ┴ ┴    ┴ ┴└┘└─┘└─┘ ┴ └─┘┴└─
+ │  │ ││││├─┘ │ ├─┤ -- ├─┤ ││ ││ │ │ ├┤ ├┬┘  v1.1
+ └─┘└─┘┴ ┴┴   ┴ ┴ ┴    ┴ ┴└┘└─┘└─┘ ┴ └─┘┴└─────────
 
 Usage: compta-ajouter [OPTION]...
   
@@ -20,6 +20,7 @@ Usage: compta-ajouter [OPTION]...
   -h            print this help
 
 Source code: <https://github.com/club-1/compta>
+Club1 doc: <https://club1.fr/docs/fr/outils/compta.html>
 EOF
 }
 
