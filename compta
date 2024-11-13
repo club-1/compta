@@ -2,7 +2,7 @@
 
 cat <<-EOF
 
-  ██████╗ ██████╗ ███╗   ███╗██████╗ ████████╗ █████╗ v1.1    
+  ██████╗ ██████╗ ███╗   ███╗██████╗ ████████╗ █████╗ v1.3    
  ██╔════╝██╔═══██╗████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗    
  ██║     ██║   ██║██╔████╔██║██████╔╝   ██║   ███████║    
  ██║     ██║   ██║██║╚██╔╝██║██╔═══╝    ██║   ██╔══██║    
@@ -171,16 +171,47 @@ ajouter () {
             echo "🗑️  transaction annulée"
             ;;
         *)
-            echo "⛔️ Erreur lors de l'ajoute de la transaction"
+            echo "⛔️ Erreur lors de l'ajout de la transaction"
             ;;
     esac
 
 }
 
+effectuer () {
+    args=()
+
+    echo '⚡️ quelle transaction voulez vous marquer comme effectuée ? (écrire son numéro identifiant)'
+    read id
+    args+=("$id")
+
+    echo "💰 compte ayant reçu l'argent ?"
+    accounts=('créer un nouveau compte')
+    readarray -t -s1 -O1 accounts <<< $(cut -f 4 /var/compta/transactions.tsv | sort -u)
+    select account in "${accounts[@]}"
+    do echo "vous avez choisi $account"
+    break
+    done
+    if test "$account" == 'créer un nouveau compte'
+    then
+        echo '👤 nom du nouveau compte ?'
+        read account
+    fi
+    args+=("$account")
+    compta-effectuer "${args[@]}"
+    case $? in
+        0)
+            echo "✨ Transaction effectuée ! Merci $USER et bonne journée"
+        ;;
+
+        *)
+            echo "⛔️ Erreur lors de la modification de la transaction"
+            ;;
+    esac
+}
 
 
 echo "🛎️  Bienvenue $USER. Que voulez vous faire ?"
-select action in 'voir les comptes' 'ajouter une transaction' 'quitter'
+select action in 'voir les comptes' 'ajouter une transaction' 'marquer une transaction comme effectuée' 'quitter'
 do
     echo '--------------------------------------------------'
     case $action in
@@ -196,6 +227,18 @@ do
             else
                 echo "Désolé, c'est impossible 😟"
                 echo "Pour ajouter une transaction, il faut être membre du groupe 'compta'"
+            fi
+
+            
+        ;;
+
+        'marquer une transaction comme effectuée')
+            if id -nG "$USER" | grep -qw 'compta'
+            then
+                effectuer
+            else
+                echo "Désolé, c'est impossible 😟"
+                echo "Pour effectuer une transaction, il faut être membre du groupe 'compta'"
             fi
 
             

@@ -4,7 +4,7 @@ usage () {
     cat <<'EOF'
 
 ┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┌─┐┌─┐┌─┐┌─┐┌─┐┌┬┐┬ ┬┌─┐┬─┐
-│  │ ││││├─┘ │ ├─┤ ── ├┤ ├┤ ├┤ ├┤ │   │ │ │├┤ ├┬┘  v1.2
+│  │ ││││├─┘ │ ├─┤ ── ├┤ ├┤ ├┤ ├┤ │   │ │ │├┤ ├┬┘  v1.3
 └─┘└─┘┴ ┴┴   ┴ ┴ ┴    └─┘└  └  └─┘└─┘ ┴ └─┘└─┘┴└─────────
   
 Usage: compta-effectuer ID ACCOUNT
@@ -103,6 +103,7 @@ case $consent in
 
     yes | oui | o | y)
         echo "$update" > /var/compta/transactions.tsv
+        exit $?
     ;;
 
     *)
