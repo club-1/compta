@@ -4,12 +4,14 @@ usage () {
     cat <<'EOF'
 
  ┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┬ ┬┌─┐┬ ┬─┐
- │  │ ││││├─┘ │ ├─┤ -- └┐││ ││ ├┬┘  v1.1
+ │  │ ││││├─┘ │ ├─┤ ── └┐││ ││ ├┬┘  v1.2
  └─┘└─┘┴ ┴┴   ┴ ┴ ┴     └┘└─┘┴ ┴└───────── 
 
 Usage: compta-voir [OPTION]... [SEARCH]
 
   -a ACCOUNT    filter using given account name
+                (Use quotes for multi words name ex: 'Monsieur Morbier')
+
   -b            Output the balance only
   -c CATEGORY   filter using one of the following category: don|infra|adhesion|autre
   -x            filter checked
@@ -47,7 +49,8 @@ do
                 category="$OPTARG"
                 data=$(echo "$data" | awk -F $'\t' -v category="$category" '$6==category')
             else
-                echo "invalid category argument '${OPTARG}'"
+                echo "invalid category '${OPTARG}'"
+                echo "valid categories are: don|infra|adhesion|autre"
                 exit 1
             fi
         ;;
@@ -93,7 +96,7 @@ case $output in
     ;;
 
     'pretty')
-        echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -ts $'\t'
+        echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -Rmontant -ts $'\t'
         exit
     ;;
 esac

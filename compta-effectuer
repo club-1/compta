@@ -1,0 +1,115 @@
+#!/bin/bash
+
+usage () {
+    cat <<'EOF'
+
+┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┌─┐┌─┐┌─┐┌─┐┌─┐┌┬┐┬ ┬┌─┐┬─┐
+│  │ ││││├─┘ │ ├─┤ ── ├┤ ├┤ ├┤ ├┤ │   │ │ │├┤ ├┬┘  v1.2
+└─┘└─┘┴ ┴┴   ┴ ┴ ┴    └─┘└  └  └─┘└─┘ ┴ └─┘└─┘┴└─────────
+  
+Usage: compta-effectuer ID ACCOUNT
+  
+ID              id of transaction to confirm
+ACCOUNT         Name of account.
+                (Use quotes for multi words name ex: 'Monsieur Morbier')
+
+  -h            print this help
+
+Source code: <https://github.com/club-1/compta>
+Club1 doc: <https://club1.fr/docs/fr/outils/compta.html>
+EOF
+}
+
+
+if test ! -w /var/compta/transactions.tsv 
+then
+    exit 2
+fi
+
+
+while getopts 'h' opt
+do
+    case $opt in
+
+        h)
+            usage
+            exit
+		;;
+        
+        ?)
+            usage
+            exit 1
+		;;
+    esac
+done
+
+shift "$(($OPTIND -1))"
+
+if test -z "$1"
+then
+    echo 'transaction id have to be set'
+    usage
+    exit 1
+fi
+
+if test -z "$2"
+then
+    echo 'account have to be set'
+    usage
+    exit 1
+fi
+
+id="$1"
+name="$2"
+
+src=$(cat /var/compta/transactions.tsv)
+line=$(echo "$src" | awk -F $'\t' -v id="$id" '$1==id')
+
+
+if test -z "$line"
+then
+    echo "No transaction with id '$id' found"
+    exit 1
+fi
+
+
+line=$(echo "$line" | awk -F $'\t' '$5=="x"')
+
+if test -n "$line"
+then
+    echo "Transaction $id is already checked"
+    exit 1
+fi
+
+
+update=$(echo "$src" | awk -F $'\t' -v id="$id" -v name="$name" 'BEGIN { OFS="\t" }  { if ($1==id) {$5="x"; $4=name;} print }')
+
+if test "$?" -ne 0 || test -z "$update"
+then
+    echo 'error while trying to edit transactions file'
+    exit 1
+fi
+
+
+
+lineUpdate=$(echo "$update" | awk -F $'\t' -v id="$id" '$1==id')
+
+echo "$lineUpdate" | column -N id,date,montant,compte,effectué,catégorie,intitulé -Rmontant -ts $'\t'
+
+
+echo "✒️  Voulez vous modifier cette transaction ? (oui/non)"
+read consent
+case $consent in
+
+    yes | oui | o | y)
+        echo "$update" > /var/compta/transactions.tsv
+    ;;
+
+    *)
+    echo 'annulation'
+        exit 130
+    ;;
+
+esac
+
+

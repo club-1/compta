@@ -4,20 +4,24 @@ usage () {
     cat <<'EOF'
 
  ┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┌─┐ ┬┌─┐┬ ┬┌┬┐┌─┐┬─┐
- │  │ ││││├─┘ │ ├─┤ -- ├─┤ ││ ││ │ │ ├┤ ├┬┘  v1.1
+ │  │ ││││├─┘ │ ├─┤ ── ├─┤ ││ ││ │ │ ├┤ ├┬┘  v1.2
  └─┘└─┘┴ ┴┴   ┴ ┴ ┴    ┴ ┴└┘└─┘└─┘ ┴ └─┘┴└─────────
 
 Usage: compta-ajouter [OPTION]...
   
   -a ACCOUNT    account name - Optional if transaction is not checked
-  -c CATEGORY   one of the following category: don|infra|adhesion|autre
+                (Use quotes for multi words name ex: 'Monsieur Morbier')
+
+• -c CATEGORY   one of the following category: don|infra|adhesion|autre
   -d DATE       date in YYYY-MM-DD format - Optional: if not set, today is used
-  -i INFO       info
+• -i INFO       info
   -m MONTANT    montant
   -x            check - Optional
   -y            do not ask for confirmation
 
   -h            print this help
+
+Options with '•' are mandatory.
 
 Source code: <https://github.com/club-1/compta>
 Club1 doc: <https://club1.fr/docs/fr/outils/compta.html>
@@ -41,7 +45,8 @@ do
             then
                 category="$OPTARG"
             else
-                echo "invalid category argument '${OPTARG}'"
+                echo "invalid category '${OPTARG}'"
+                echo "valid categories are: don|infra|adhesion|autre"
                 exit 1
             fi
         ;;

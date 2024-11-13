@@ -26,30 +26,42 @@ mais l'écriture devrait être limité au groupe `compta`.
 Interface
 ---------
 
-Bien qu'utilisant une CLI, ce logiciel essaye de faciliter la manipulation ou la lecture au maximum. Pour cela, il se contente de poser des questions.
-
-L'utilisation la plus simple consiste à lancer la commande principale :
+L'interface principale est 100% interactive. Il n'y a aucun argument ou options nécessaire à son utilisation.
 
     compta
 
-Cette dernière va proposer un menu, qui est équivalent à lancer directement l'une ou l'autre des deux commandes suivantes.
+C'est une "sur-couche" interactive pour les commandes suivantes, qui elles ne sont pas interactives.
 
 ### voir
 
     compta-voir
 
-Pour afficher le contenu du fichier de transaction avec des colonnes et des options de filtrage.
+Pour afficher et filtrer la liste des transactions.
 
 ### ajouter
 
     compta-ajouter
 
-Formulaire d'ajout de transaction.
+Ajoute une transaction.
+
+### effectuer
+
+    compta-effectuer
+
+Indique qu'une transaction a été "effectuée".
 
 
 Mise en place
 -------------
 
 Les trois commandes doivent être ajouté au PATH.
-`compta-ajouter` devrait être reservé aux membres du groupe `compta`
+`compta-ajouter` et `compta-effectuer` devrait être reservé aux membres du groupe `compta`
 car elle permet d'écrire dansle fichier de transaction.
+
+
+Fontes
+------
+
+La fonte *figlet* utilisée pour la commande interactive s'appelle `ANSI Shadow` -- [archive sur le repo Github de xero](https://github.com/xero/figlet-fonts/blob/master/ANSI%20Shadow.flf)
+
+La fonte *figlet* utilisée pour les sous-commandes s'apelle `Calvin S` -- [archive sur le repo Github de xero](https://github.com/xero/figlet-fonts/blob/master/Calvin%20S.flf)
