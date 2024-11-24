@@ -7,7 +7,7 @@ DATA_DIR    := $(DESTDIR)/var/compta
 DATA_GROUP  ?= compta
 
 # Files to install
-BINS        := compta compta-ajouter compta-voir
+BINS        := compta compta-ajouter compta-effectuer compta-voir
 
 # Installed files
 BINS_INST   := $(patsubst %,$(BIN_DIR)/%,$(BINS))
