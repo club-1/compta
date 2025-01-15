@@ -96,7 +96,11 @@ case $output in
     ;;
 
     'pretty')
-        echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -Rmontant -ts $'\t'
+        echo "$data" | column -N id,date,montant,compte,effectué,catégorie,intitulé -R montant -ts $'\t'
+        echo '════════════════════════════════════════════════════════════════════════════════════════════════════'
+        balance=$(echo "$data" | cut -f 3 | awk '{t=t+$1} END{print t}')
+        lineCount=$(echo "$data" | wc -l)
+        echo "    balance :     $balance €                                                   ($lineCount entrées)"
         exit
     ;;
 esac
