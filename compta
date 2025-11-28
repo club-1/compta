@@ -110,7 +110,7 @@ ajouter () {
 
     echo "📅 à quelle date ? (au format YYYY-MM-DD) lasser vide pour aujourd'hui"
     read date
-    if test -z "$date"
+    if test -n "$date"
     then
         args+=('-d' "$date")
     fi
