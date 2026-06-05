@@ -89,6 +89,7 @@ EOF
         echo "✅ $option"
     fi
 
+    echo
     compta-voir "${args[@]}"
 }
 
