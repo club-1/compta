@@ -4,10 +4,10 @@ usage () {
     cat <<'EOF'
 
  ┌─┐┌─┐┌┬┐┌─┐┌┬┐┌─┐    ┬ ┬┌─┐┬ ┬─┐
- │  │ ││││├─┘ │ ├─┤ ── └┐││ ││ ├┬┘  v1.3
+ │  │ ││││├─┘ │ ├─┤ ── └┐││ ││ ├┬┘  v1.4
  └─┘└─┘┴ ┴┴   ┴ ┴ ┴     └┘└─┘┴ ┴└───────── 
 
-Usage: compta-voir [OPTION]... [SEARCH]
+Usage: compta-voir [OPTIONS]... [SEARCH]
 
   -a ACCOUNT    filter using given account name
                 (Use quotes for multi words name ex: 'Monsieur Morbier')
@@ -16,6 +16,8 @@ Usage: compta-voir [OPTION]... [SEARCH]
   -c CATEGORY   filter using one of the following category: don|infra|adhesion|autre
   -x            filter checked
   -u            filter unchecked
+  -s COLUMN     sort by a column name (accents are mandatory)
+  -r            revert sort order
   -t            output TSV without headers
   
   -h            print this help
@@ -31,7 +33,7 @@ output='pretty'
 
 data=$(cat /var/compta/transactions.tsv)
 
-while getopts 'a:bc:tuxh' opt
+while getopts 'a:bc:tuxs:rh' opt
 do
     case $opt in
         a)
@@ -65,6 +67,29 @@ do
 
         x)
             data=$(echo "$data" | awk -F $'\t' '$5=="x"')
+        ;;
+
+        s)
+            num='' # numerical sorting flag
+            case "$OPTARG" in
+                id)        sort=1; num='-g' ;;
+                date)      sort=2; num='-g' ;;
+                montant)   sort=3; num='-g' ;;
+                compte)    sort=4 ;;
+                effectué)  sort=5 ;;
+                catégorie) sort=6 ;;
+                intitulé)  sort=7 ;;
+                *)
+                    echo "invalid sort column name '${OPTARG}'"
+                    usage
+                    exit 1
+                    ;;
+            esac
+            data=$(echo "$data" | sort -t $'\t' -k $sort $num)
+        ;;
+
+        r)
+            data=$(echo "$data" | tac)
         ;;
 
         h)
