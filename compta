@@ -219,7 +219,7 @@ effectuer () {
 
 
 echo "🛎️  Bienvenue $USER. Que voulez vous faire ?"
-select action in 'voir les comptes' 'ajouter une transaction' 'marquer une transaction comme effectuée' 'quitter'
+select action in 'voir les comptes' 'ajouter une transaction' 'marquer une transaction comme effectuée' 'voir la balance des comptes' 'quitter'
 do
     echo '--------------------------------------------------'
     case $action in
@@ -248,6 +248,19 @@ do
                 echo "Désolé, c'est impossible 😟"
                 echo "Pour effectuer une transaction, il faut être membre du groupe 'compta'"
             fi
+
+            
+        ;;
+
+        'voir la balance des comptes')
+            echo '⚖️ balance pour les différents comptes :'
+            echo
+            readarray -t -s1 -O1 accounts <<< $(cut -f 4 /var/compta/transactions.tsv | sort -u)
+            for account in "${accounts[@]}"
+            do
+                echo "$account :" $(compta-voir -b -a "$account") "€"
+                echo
+            done
 
             
         ;;
