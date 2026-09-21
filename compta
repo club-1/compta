@@ -219,12 +219,12 @@ effectuer () {
 
 
 echo "🛎️  Bienvenue $USER. Que voulez vous faire ?"
-select action in 'voir les comptes' 'ajouter une transaction' 'marquer une transaction comme effectuée' 'voir la balance des comptes' 'quitter'
+select action in 'consulter' 'ajouter une transaction' 'marquer une transaction comme effectuée' 'voir la balance des comptes' 'quitter'
 do
     echo '--------------------------------------------------'
     case $action in
 
-        'voir les comptes')
+        'consulter')
             voir
         ;;
 
